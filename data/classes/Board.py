@@ -95,7 +95,6 @@ class Board:
 							(x, y), 'white' if piece[0] == 'w' else 'black', self
 						)
 
-
 	def handle_click(self, mx, my):
 		x = mx // self.tile_width
 		y = my // self.tile_height
@@ -113,15 +112,17 @@ class Board:
 					print(f"¡Se ha capturado una ficha del equipo contrario: {captured_piece}!")
 					# Cambio de color de la ficha capturada
 					captured_piece.color = self.selected_piece.color
-					# La ficha capturada se mantiene en la misma posición
-					captured_piece.pos = clicked_square.pos
-					# Actualización de la ficha capturada en la casilla
-					clicked_square.occupying_piece = captured_piece
 
 			if self.selected_piece.move(self, clicked_square):
 				self.turn = 'white' if self.turn == 'black' else 'black'
 
-		self.selected_piece = None
+			# Actualización de la ficha en la casilla de origen si hay una ficha seleccionada
+			if self.selected_piece is not None:
+				self.selected_piece.pos = clicked_square.pos
+				clicked_square.occupying_piece = self.selected_piece
+
+			self.selected_piece = None
+
 
 
 	def is_in_check(self, color, board_change=None): # board_change = [(x1, y1), (x2, y2)]
