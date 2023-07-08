@@ -27,7 +27,7 @@ class Board:
 			['','','','','','','',''],
 			['','','','','','','',''],
 			['','','','','','','',''],
-			['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+			['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', ''],
 			['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'],
 		]
 
@@ -95,7 +95,7 @@ class Board:
 							(x, y), 'white' if piece[0] == 'w' else 'black', self
 						)
 
-	def handle_click(self, mx, my):
+	'''def handle_click(self, mx, my):
 		x = mx // self.tile_width
 		y = my // self.tile_height
 		clicked_square = self.get_square_from_pos((x, y))
@@ -122,7 +122,7 @@ class Board:
 				clicked_square.occupying_piece = self.selected_piece
 
 			self.selected_piece = None
-
+'''
 
 
 	def is_in_check(self, color, board_change=None): # board_change = [(x1, y1), (x2, y2)]
@@ -193,3 +193,126 @@ class Board:
 
 		for square in self.squares:
 			square.draw(display)
+
+
+
+	def evaluate_board(self):
+		score: int = 0
+		piece_values = {'P': 1, 'K': 15}
+
+		for square in self.squares:
+			if square.occupying_piece is not None:
+				piece = square.occupying_piece
+				value = piece_values.get(piece.notation, 0)
+				if piece.color == 'white':
+					score += value
+				else:
+					score -= value
+
+		return score
+
+	def minimax(self, depth, maximizing_player):
+		if depth == 0 or self.is_in_checkmate('white') or self.is_in_checkmate('black'):
+			return self.evaluate_board()
+
+		if maximizing_player:
+			max_value = float('-inf')
+			for square in self.squares:
+				if square.occupying_piece is not None and square.occupying_piece.color == self.turn:
+					for move in square.occupying_piece.get_valid_moves(self):
+						board_change = (square.pos, move.pos)
+						if not self.is_in_check(self.turn, board_change):
+							captured_piece = move.occupying_piece
+							move.occupying_piece = square.occupying_piece
+							square.occupying_piece = None
+							self.turn = 'black' if self.turn == 'white' else 'white'
+
+							value = self.minimax(depth - 1, False)
+							max_value = max(max_value, value)
+
+							self.turn = 'black' if self.turn == 'white' else 'white'
+							square.occupying_piece = move.occupying_piece
+							move.occupying_piece = captured_piece
+
+			return max_value
+		else:
+			min_value = float('inf')
+			for square in self.squares:
+				if square.occupying_piece is not None and square.occupying_piece.color == self.turn:
+					for move in square.occupying_piece.get_valid_moves(self):
+						board_change = (square.pos, move.pos)
+						if not self.is_in_check(self.turn, board_change):
+							captured_piece = move.occupying_piece
+							move.occupying_piece = square.occupying_piece
+							square.occupying_piece = None
+							self.turn = 'black' if self.turn == 'white' else 'white'
+
+							value = self.minimax(depth - 1, True)
+							min_value = min(min_value, value)
+
+							self.turn = 'black' if self.turn == 'white' else 'white'
+							square.occupying_piece = move.occupying_piece
+							move.occupying_piece = captured_piece
+
+			return min_value
+
+	def handle_click(self, mx, my):
+		if self.turn == 'white':  # Asumiendo que el jugador humano juega con las blancas
+			x = mx // self.tile_width
+			y = my // self.tile_height
+			clicked_square = self.get_square_from_pos((x, y))
+
+			if self.selected_piece is None:
+				if clicked_square.occupying_piece is not None:
+					if clicked_square.occupying_piece.color == self.turn:
+						self.selected_piece = clicked_square.occupying_piece
+			else:
+				if clicked_square.occupying_piece is not None:
+					if clicked_square.occupying_piece.color != self.selected_piece.color:
+						# Captura de la ficha del equipo contrario
+						captured_piece = clicked_square.occupying_piece
+						print(f"¡Se ha capturado una ficha del equipo contrario: {captured_piece}!")
+						# Cambio de color de la ficha capturada
+						captured_piece.color = self.selected_piece.color
+
+				if self.selected_piece.move(self, clicked_square):
+					self.turn = 'white' if self.turn == 'black' else 'black'
+
+				# Actualización de la ficha en la casilla de origen si hay una ficha seleccionada
+				if self.selected_piece is not None:
+					self.selected_piece.pos = clicked_square.pos
+					clicked_square.occupying_piece = self.selected_piece
+
+				self.selected_piece = None
+
+		else:  # IA juega con las negras utilizando minimax
+			best_move = None
+			best_value = float('-inf')
+
+			for square in self.squares:
+				if square.occupying_piece is not None and square.occupying_piece.color == self.turn:
+					for move in square.occupying_piece.get_valid_moves(self):
+						board_change = (square.pos, move.pos)
+						if not self.is_in_check(self.turn, board_change):
+							captured_piece = move.occupying_piece
+							move.occupying_piece = square.occupying_piece
+							square.occupying_piece = None
+							self.turn = 'white' if self.turn == 'black' else 'black'
+
+							value = self.minimax(1, False)
+
+							if value > best_value:
+								best_value = value
+								best_move = (square, move)
+
+							self.turn = 'white' if self.turn == 'black' else 'black'
+							square.occupying_piece = move.occupying_piece
+							move.occupying_piece = captured_piece
+
+			if best_move is not None:
+				move_start, move_end = best_move
+				move_end.occupying_piece = move_start.occupying_piece
+				move_start.occupying_piece = None
+				self.turn = 'white' if self.turn == 'black' else 'black'
+   
+   
