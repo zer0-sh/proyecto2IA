@@ -1,4 +1,7 @@
 import pygame
+import tkinter as tk
+from tkinter import messagebox
+
 
 from data.classes.Board import Board
 
@@ -29,8 +32,10 @@ if __name__ == '__main__':
 					board.handle_click(mx, my)
 		if board.is_in_checkmate('black'): # If black is in checkmate
 			print('White wins!')
+			messagebox.showinfo("Mensaje", "Felicidades, has ganado!")
 			running = False
 		elif board.is_in_checkmate('white'): # If white is in checkmate
+			messagebox.showinfo("Mensaje", "Oops, has perdido!")
 			print('Black wins!')
 			running = False
 		# Draw the board

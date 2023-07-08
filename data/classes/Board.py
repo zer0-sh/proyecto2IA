@@ -27,7 +27,7 @@ class Board:
 			['','','','','','','',''],
 			['','','','','','','',''],
 			['','','','','','','',''],
-			['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', ''],
+			['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
 			['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'],
 		]
 
@@ -57,6 +57,8 @@ class Board:
 
 
 	def setup_board(self):
+
+		pygame.display.set_caption("AJEDREZ LOCO")
 		# iterating 2d list
 		for y, row in enumerate(self.config):
 			for x, piece in enumerate(row):
@@ -166,7 +168,7 @@ class Board:
 		if board_change is not None:
 			old_square.occupying_piece = changing_piece
 			new_square.occupying_piece = new_square_old_piece
-						
+
 		return output
 
 
@@ -299,7 +301,7 @@ class Board:
 							square.occupying_piece = None
 							self.turn = 'white' if self.turn == 'black' else 'black'
 
-							value = self.minimax(1, False)
+							value = self.minimax(1, False) # PROFUNDIDAD
 
 							if value > best_value:
 								best_value = value
@@ -314,5 +316,4 @@ class Board:
 				move_end.occupying_piece = move_start.occupying_piece
 				move_start.occupying_piece = None
 				self.turn = 'white' if self.turn == 'black' else 'black'
-   
-   
+
