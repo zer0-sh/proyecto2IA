@@ -200,7 +200,7 @@ class Board:
 
 	def evaluate_board(self):
 		score: int = 0
-		piece_values = {'P': 1, 'K': 15}
+		piece_values = {'P': 1, 'B': 3, 'N': 3, 'R': 5, 'Q': 9, 'K': 15 } ##heuristica
 
 		for square in self.squares:
 			if square.occupying_piece is not None:
@@ -317,3 +317,4 @@ class Board:
 				move_start.occupying_piece = None
 				self.turn = 'white' if self.turn == 'black' else 'black'
 
+		# 

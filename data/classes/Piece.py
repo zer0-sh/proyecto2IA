@@ -46,7 +46,6 @@ class Piece:
 			board.selected_piece = None
 			return False
 
-
 	def get_moves(self, board):
 		output = []
 		for direction in self.get_possible_moves(board):
